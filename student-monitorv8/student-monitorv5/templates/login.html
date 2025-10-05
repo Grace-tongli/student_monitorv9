@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>学生监控系统 - 登录</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="login-container">
+        <h2>学生监控系统登录</h2>
+
+        {% if error %}
+        <div class="error">{{ error }}</div>
+        {% endif %}
+
+        <form method="POST">
+            <div class="form-group">
+                <label for="username">用户名:</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password">密码:</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+
+            <button type="submit">登录</button>
+        </form>
+        <!-- 在登录表单下方添加注册链接 -->
+
+        <!-- 添加成功消息显示 -->
+        {% if success %}
+        <div class="success" style="color: green; margin-bottom: 15px; padding: 10px; background-color: #eeffee; border-radius: 4px; border: 1px solid #ccffcc;">
+            {{ success }}
+        </div>
+        {% endif %}
+
+    </div>
+</body>
+</html>

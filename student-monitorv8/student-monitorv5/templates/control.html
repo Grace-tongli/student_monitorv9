@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>监控系统控制面板</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div>
+        <button onclick="control('start')">启动监控</button>
+        <button onclick="control('stop')">停止监控</button>
+    </div>
+    <canvas id="dataChart" width="400" height="200"></canvas>
+
+    <script>
+    async function control(action) {
+        const res = await fetch('/control', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({action})
+        });
+        alert((await res.json()).status);
+    }
+
+    // 数据可视化
+    const ctx = document.getElementById('dataChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['键盘活动', '鼠标移动'],
+            datasets: [{
+                label: '监控数据',
+                data: [0, 0],
+                backgroundColor: ['#ff6384', '#36a2eb']
+            }]
+        }
+    });
+
+    // 定时更新数据
+    setInterval(async () => {
+        const data = await (await fetch('/data')).json();
+        chart.data.datasets[0].data = [
+            data.keyboard.clicks,
+            data.mouse.movement
+        ];
+        chart.update();
+    }, 1000);
+    </script>
+</body>
+</html>

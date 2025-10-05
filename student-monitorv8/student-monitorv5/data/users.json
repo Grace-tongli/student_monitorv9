@@ -1,0 +1,42 @@
+{
+  "admin": {
+    "password": "admin123",
+    "role": "admin"
+  },
+  "student1": {
+    "password": "student123",
+    "role": "student"
+  },
+  "student2": {
+    "password": "student123",
+    "role": "student"
+  },
+  "Tong": {
+    "password": "123456",
+    "role": "student"
+  },
+  "a": {
+    "password": "a",
+    "role": "student"
+  },
+    "b": {
+    "password": "b",
+    "role": "student"
+  },
+    "c": {
+    "password": "c",
+    "role": "student"
+  },
+    "d": {
+    "password": "d",
+    "role": "student"
+  },
+    "e": {
+    "password": "e",
+    "role": "student"
+  },
+    "f": {
+    "password": "f",
+    "role": "student"
+  }
+}

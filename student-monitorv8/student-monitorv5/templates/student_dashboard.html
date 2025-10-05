@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>学生学习支持系统 - 仪表板</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <!-- 新 Bootstrap 核心 CSS 文件 -->
+    <link href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- jQuery文件。务必在bootstrap.min.js 之前引入 -->
+    <script src="https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script>
+
+    <!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+    <script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <style>
+        .upload-container {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            z-index: 1000;
+        }
+        .upload-btn {
+            background-color: #2196F3;
+            margin-right: 10px;
+        }
+        .upload-btn:hover {
+            background-color: #0b7dda;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>学生学习支持系统</h1>
+            <div class="user-info">
+                欢迎, {{ name }} | <a href="{{ url_for('logout') }}">退出</a>
+            </div>
+        </header>
+
+        <div class="dashboard">
+            <h2>功能控制</h2>
+            <div class="control-panel">
+                <div class="status">
+                    <h3>当前状态: <span id="status-indicator">{{ '运行中' if status.mouse or status.keyboard else '已停止' }}</span></h3>
+                    {% if status.start_time %}
+                    <p>开始时间: {{ status.start_time }}</p>
+                    {% endif %}
+                </div>
+
+                <div class="controls">
+                    <button id="start-btn"  data-toggle="modal" data-target="#myModal" {{ 'disabled' if status.mouse or status.keyboard else '' }}>开始记录</button>
+                    <button id="stop-btn" onclick="stopMonitoring()" {{ 'disabled' if not status.mouse and not status.keyboard else '' }}>暂停记录</button>
+                </div>
+
+                <div class="options">
+                    <label><input type="checkbox" id="monitor-mouse"  checked> 跟踪鼠标使用</label>
+                    <label><input type="checkbox" id="monitor-keyboard" checked> 跟踪键盘输入</label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 上传区域 -->
+    <div class="upload-container">
+        <input type="file" id="file-upload" accept=".csv" style="display: none;" />
+        <button class="upload-btn" onclick="document.getElementById('file-upload').click()">选择CSV文件</button>
+        <button id="upload-btn" onclick="uploadFile()" disabled>上传数据</button>
+    </div>
+
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel">编程情绪微量表</h4>
+            </div>
+            <div class="modal-body">
+                <form class="form-horizontal" role="form">
+                    <div class="radio">
+                        <label>
+                          <input name="type" type="radio" value="A" onchange="autoSubmitEmotion(this.value)">A 专注 流畅编码，完全投入
+                        </label>
+                    </div>
+                    <div class="radio">
+                        <label>
+                          <input name="type" type="radio" value="B" onchange="autoSubmitEmotion(this.value)">B 无聊 简单重复，缺乏挑战
+                        </label>
+                    </div>
+                    <div class="radio">
+                        <label>
+                           <input name="type" type="radio" value="C" onchange="autoSubmitEmotion(this.value)">C 困惑 思路卡壳，不知方向
+                        </label>
+                    </div>
+                    <div class="radio">
+                        <label>
+                           <input name="type" type="radio" value="C" onchange="autoSubmitEmotion(this.value)">C 困惑 思路卡壳，不知方向
+                        </label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal -->
+</div>
+
+    <script src="{{ url_for('static', filename='js/student.js') }}"></script>
+
+    <script>
+        let isOk = "{{ '1' if status.mouse or status.keyboard else '0'}}"
+        console.log(isOk)
+
+
+        // 定时任务事件
+        setInterval(()=> {
+            // 判断当前事件是否开启
+            console.log('ok')
+            let modalShow = $('#myModal').css('display')
+            console.log(modalShow)
+            if (isOk === '1' && modalShow === 'none')
+           $("#myModal").modal('show')
+        }, 1000*60*2)
+
+        // 文件上传相关逻辑
+        const fileInput = document.getElementById('file-upload');
+        const uploadBtn = document.getElementById('upload-btn');
+
+        fileInput.addEventListener('change', (e) => {
+            // 当选择文件后启用上传按钮
+            uploadBtn.disabled = e.target.files.length === 0;
+        });
+
+        function uploadFile() {
+            const file = fileInput.files[0];
+            if (!file) {
+                alert('请先选择一个CSV文件');
+                return;
+            }
+
+            // 验证文件类型
+            if (file.type !== 'text/csv' && !file.name.endsWith('.csv')) {
+                alert('请选择CSV格式的文件');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            fetch('https://57vx365re578.vicp.fun/test_upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                }
+                throw new Error('上传失败');
+            })
+            .then(data => {
+                alert('文件上传成功！');
+                console.log('上传成功响应:', data);
+                // 重置文件选择
+                fileInput.value = '';
+                uploadBtn.disabled = true;
+            })
+            .catch(error => {
+                alert('上传失败: ' + error.message);
+                console.error('上传错误:', error);
+            });
+        }
+    </script>
+</body>
+</html>
